@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+      - DATABASE_URL=sqlite:///printers.db
+      - SNMP_TIMEOUT=3
+      - SNMP_RETRIES=1
+      - SCAN_INTERVAL_MINUTES=5
+    volumes:
+      - ./database:/app/database
+      - ./config:/app/config
+    restart: unless-stopped
+    networks:
+      - printer-monitor
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - printer-monitor
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - printer-monitor
+
+networks:
+  printer-monitor:
+    driver: bridge
+
+volumes:
+  database:
