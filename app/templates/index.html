@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="title">Printers</h1>
+<div class="box">
+	<form method="post" action="/printers/add">
+		<div class="columns is-multiline">
+			<div class="column is-3">
+				<label class="label">IP Address</label>
+				<input class="input" type="text" name="ip_address" placeholder="192.168.1.50" required />
+			</div>
+			<div class="column is-3">
+				<label class="label">Name (optional)</label>
+				<input class="input" type="text" name="name" placeholder="Front Office" />
+			</div>
+			<div class="column is-3">
+				<label class="label">SNMP Community</label>
+				<input class="input" type="text" name="snmp_community" value="public" />
+			</div>
+			<div class="column is-2">
+				<label class="label">SNMP Port</label>
+				<input class="input" type="number" name="snmp_port" value="161" />
+			</div>
+			<div class="column is-12">
+				<button class="button is-primary">Add Printer</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+<table class="table is-striped is-fullwidth">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+			<th>IP Address</th>
+			<th>Status</th>
+			<th>Last Seen</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for p in printers %}
+		<tr>
+			<td>{{ p.id }}</td>
+			<td>{{ p.name or p.printer_name or '-' }}</td>
+			<td>{{ p.ip_address }}</td>
+			<td>
+				{% if p.online %}
+				<span class="tag is-success">Online</span>
+				{% else %}
+				<span class="tag is-light">Offline</span>
+				{% endif %}
+				{% if p.status_text %}<span class="tag is-info is-light">{{ p.status_text }}</span>{% endif %}
+			</td>
+			<td>{{ p.last_seen_at or '-' }}</td>
+			<td><a class="button is-small" href="/printers/{{ p.id }}">Details</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

@@ -1,37 +1,38 @@
-## Welcome to GitHub Pages
+# SNMP Printer Monitor
 
-You can use the [editor on GitHub](https://github.com/illyashakim/cv/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+A simple FastAPI web application that monitors network printers via SNMP, displaying overall status and toner/cartridge levels.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Features
+- Add printers by IP and SNMP community
+- Background polling (default every 5 minutes)
+- View live status (online/offline, hrDeviceStatus) and supplies levels with percentages
+- REST API for printers and supplies
 
-### Markdown
+## Requirements
+- Python 3.11+
+- Network access to printers on UDP/161 (SNMP v2c)
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+## Setup
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+## Run
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-### Jekyll Themes
+Open `http://localhost:8000` in your browser.
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/illyashakim/cv/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+## Configuration
+Environment variables (prefix `PRN_`):
+- `PRN_DATABASE_URL` (default `sqlite:////workspace/data/app.db`)
+- `PRN_POLL_INTERVAL_SECONDS` (default `300`)
+- `PRN_SNMP_TIMEOUT_SECONDS` (default `1`)
+- `PRN_SNMP_RETRIES` (default `1`)
 
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+## Notes
+- Supplies OIDs use Printer-MIB `prtMarkerSupplies*` tables. Some devices may not expose all fields.
+- Negative levels (e.g. `-2`, `-3`) are treated as unknown.
