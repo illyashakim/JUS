@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="title">Printer {{ printer.id }} - {{ printer.name or printer.printer_name or printer.ip_address }}</h1>
+<div class="columns">
+	<div class="column is-4">
+		<div class="box">
+			<p><strong>IP:</strong> {{ printer.ip_address }}</p>
+			<p><strong>sysName:</strong> {{ printer.sys_name or '-' }}</p>
+			<p><strong>Printer Name:</strong> {{ printer.printer_name or '-' }}</p>
+			<p><strong>Status:</strong> {% if printer.online %}<span class="tag is-success">Online</span>{% else %}<span class="tag is-light">Offline</span>{% endif %} {{ printer.status_text or '' }}</p>
+			<p><strong>Last Seen:</strong> {{ printer.last_seen_at or '-' }}</p>
+		</div>
+	</div>
+	<div class="column is-8">
+		<h2 class="subtitle">Supplies</h2>
+		<table class="table is-striped is-fullwidth">
+			<thead>
+				<tr>
+					<th>Index</th>
+					<th>Description</th>
+					<th>Level</th>
+					<th>Max</th>
+					<th>Percent</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for s in printer.supplies|sort(attribute='supply_index') %}
+				<tr>
+					<td>{{ s.supply_index }}</td>
+					<td>{{ s.description or '-' }}</td>
+					<td>{{ s.level if s.level is not none else '-' }}</td>
+					<td>{{ s.max_capacity if s.max_capacity is not none else '-' }}</td>
+					<td>
+						{% if s.percent is not none %}
+							<progress class="progress is-primary level-indicator" value="{{ s.percent }}" max="100">{{ s.percent }}%</progress>
+							<span>{{ s.percent }}%</span>
+						{% else %}
+							-
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}
